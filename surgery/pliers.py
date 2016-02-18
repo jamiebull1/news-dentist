@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 pliers.py
 ~~~~~~~~~
@@ -7,17 +8,19 @@ Google News.
 """
 
 import argparse
-import itertools
+import os
 import re
-import shutil
-
+from concurrent import futures
 from bs4 import BeautifulSoup
 import requests
-
 
 MIN_LENGTH = 20  # minimum line length in words
 
 SEARCH_URL = 'https://www.google.com/search'
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+STATIC_DIR = os.path.join(THIS_DIR, "static")
+
+MAX_WORKERS = 20
 
 headers = {
     'User-Agent':
@@ -43,6 +46,8 @@ def visible(element):
     ]:
         return False
     elif '<' in str(element) and '>' in str(element):  # HTML tags
+        return False
+    elif '//' in str(element):  # comment tags
         return False
     elif re.match('\[if .*endif\]', str(element)):  # IE strings
         return False
@@ -75,29 +80,39 @@ def get_article_links(links):
     regex_matches = [
         re.findall(r'/url\?q=(http.*)&sa=U', link['href'])
         for link in links]
-    return itertools.chain(regex_matches)
+    return list(m[0] for m in regex_matches if m)
 
 
-def fetch_results(links, completed):
+def fetch_results(links):
     """
     Fetch the text from the article links and add the article to a list of
     links already visited.
 
     """
     batch = []
-    for link in links:
-        if link and link not in completed:
-            res = requests.get(link[0], headers=headers)
-            html = res.text
-            soup = BeautifulSoup(html, 'lxml')
-            texts = soup.find_all(text=True)
-            visible_texts = filter(visible, texts)
-            batch.extend(visible_texts)
-            completed.append(link)
-    return batch, completed
+    to_fetch = [link for link in links if link]
+    workers = min(MAX_WORKERS, len(to_fetch))
+    with futures.ThreadPoolExecutor(workers) as executor:
+        res = executor.map(extract, to_fetch)
+    for r in res:
+        batch.extend(list(r))
+    return batch
+
+
+def extract(link):
+    """Fetch and process a link, retaining text which appears to be body text.
+    """
+    res = requests.get(link, headers=headers)
+    html = str(res.text)
+    soup = BeautifulSoup(html, 'lxml')
+    texts = soup.find_all(text=True)
+    
+    return filter(visible, texts)
 
 
 def linkify(query_txt):
+    """Make a query into a safe filename.
+    """
     query_txt = query_txt.replace(' ', '_')
     query_txt = re.sub("[^a-zA-Z_]", "", query_txt)
     filename = "{}.txt".format(query_txt)
@@ -107,18 +122,20 @@ def linkify(query_txt):
 def main(query, page_depth):
     """Main loop.
     """
-    completed = []
+    with open(os.path.join(
+            STATIC_DIR, 'teeth/{}'.format(linkify(query))),'w') as tmp_f:
+        tmp_f.write('Still waiting for results')
+    batch = []
     for page_depth in range(int(page_depth)):
         links = get_all_links(query, page_depth)
-        # get links to try
-        article_links = get_article_links(links)
+        # get unique links to try
+        article_links = set(get_article_links(links))
         # try the links
-        batch, completed = fetch_results(article_links, completed)
+        batch.extend(fetch_results(article_links))
         # save the results
-        with open('static/tmp/{}'.format(linkify(query)), 'w+') as f:
-            f.writelines('\n'.join(l.strip() for l in batch))
-    shutil.move('static/tmp/{}'.format(linkify(query)),
-                'static/teeth/{}'.format(linkify(query)))
+    with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(linkify(query))), 'w+',
+              encoding='utf8') as f:
+        f.writelines('\n'.join(l.strip() for l in batch))
 
 
 if __name__ == "__main__":

@@ -1,16 +1,16 @@
 # all the imports
 from contextlib import closing
+import os
 import sqlite3
 
 from flask import (g, session, request, render_template, abort, redirect, flash,
-                   url_for, )
+                   url_for, send_from_directory)
 from flask import Flask
-
-import pliers
+from surgery import pliers
 
 
 # configuration
-DATABASE = '/tmp/flaskr.db'
+DATABASE = '/tmp/news-dentist.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'
@@ -18,8 +18,10 @@ PASSWORD = 'default'
 UPLOAD_FOLDER = 'results'
 ALLOWED_EXTENSIONS = set('txt')
 
+THIS_DIR = os.path.abspath(os.path.dirname(__file__))
+STATIC_DIR = os.path.join(THIS_DIR, "static")
 
-# create our little application :)
+# create our application
 app = Flask(__name__, static_url_path='')
 app.config.from_object(__name__)
 
@@ -70,6 +72,12 @@ def show_results():
     return render_template('show_results.html', queries=queries)
 
 
+@app.route('/teeth/<path:path>')
+def send_result(path):
+    teeth_dir = os.path.join(STATIC_DIR, 'teeth')
+    return send_from_directory(teeth_dir, path)
+
+
 @app.route('/add', methods=['POST'])
 def make_query():
     if not session.get('logged_in'):
@@ -81,10 +89,8 @@ def make_query():
                   results_link])
     g.db.commit()
     # start the query running
-    with open('static/teeth/{}'.format(results_link), 'w') as placeholder:
-        placeholder.write('Still waiting for results')
     pliers.main(request.form['query'], request.form['depth'])
-    flash('New query was successfully started')
+    flash('Getting the pliers out. This won\'t hurt a bit...')
     return redirect(url_for('show_queries'))
 
 
@@ -108,7 +114,3 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_queries'))
-
-
-if __name__ == '__main__':
-    app.run()
