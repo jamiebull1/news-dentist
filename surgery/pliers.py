@@ -7,23 +7,23 @@ Google News.
 
 """
 
-import argparse
 from concurrent import futures
+import argparse
 import os
 import re
 import time
+from functools import partial
 
 from bs4 import BeautifulSoup
 import requests
 
-
-MIN_LENGTH = 20  # minimum line length in words
 
 SEARCH_URL = 'https://www.google.com/search'
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(THIS_DIR, "static")
 
 MAX_WORKERS = 20
+MIN_LENGTH = 20
 
 headers = {
     'User-Agent':
@@ -37,7 +37,7 @@ params = {
 }
 
 
-def visible(element):
+def visible(element, minlength):
     """Filter out lines which are not part of the main text.
     """
     if element.parent.name in [
@@ -56,7 +56,7 @@ def visible(element):
         return False
     elif not element.strip():  # empty lines
         return False
-    elif len(element.split()) < MIN_LENGTH:  # short lines, e.g. menu items
+    elif len(element.split()) < int(minlength):  # short lines, e.g. menu items
         return False
     elif '©' in element:  # copyright lines
         return False
@@ -98,13 +98,15 @@ def fetch_results(links, stopwords, minlength):
         return batch
     workers = min(MAX_WORKERS, len(to_fetch))
     with futures.ThreadPoolExecutor(workers) as executor:
-        res = executor.map(extract, to_fetch)
+        res = executor.map(partial(extract,
+                                   stopwords=stopwords,
+                                   minlength=minlength), to_fetch)
     for r in res:
         batch.extend(list(r))
     return batch
 
 
-def extract(link):
+def extract(link, stopwords=None, minlength=None):
     """Fetch and process a link, retaining text which appears to be body text.
     """
     try:
@@ -115,29 +117,31 @@ def extract(link):
     html = str(res.text)
     soup = BeautifulSoup(html, 'lxml')
     texts = soup.find_all(text=True)
-
-    lines = list(filter(visible, texts))
+    lines = list(filter(partial(visible, minlength=minlength), texts))
     if lines:
         print('Received %i lines from: %s' % (len(lines), link))
+    if any(word in html for word in stopwords):
+        return []
     return lines
 
-def linkify(query_txt):
+
+def linkify(query_txt, timestr):
     """Make a query into a safe filename with timestamp.
     """
     query_txt = query_txt.replace(' ', '_')
     query_txt = re.sub("[^a-zA-Z_]", "", query_txt)
-
-    timestr = time.strftime("%Y%m%d_%H%M%S")
-
+    timestr = re.sub(r"[/:-]", "", timestr)
     filename = "{}_{}.txt".format(query_txt, timestr)
     return filename
 
 
-def main(query, page_depth=1, file_name='', stopwords=None, minlength=20):
+def main(query, page_depth=1, file_name='', stopwords=None, minlength=''):
     """Main loop.
     """
+    if minlength == '':
+        minlength = MIN_LENGTH
     with open(os.path.join(
-            STATIC_DIR, 'teeth/{}'.format(file_name)),'w') as tmp_f:
+            STATIC_DIR, 'teeth/{}'.format(file_name)), 'w') as tmp_f:
         tmp_f.write('Waiting for results.')
     batch = []
     for page_depth in range(int(page_depth)):

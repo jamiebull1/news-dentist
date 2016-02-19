@@ -2,10 +2,12 @@
 from contextlib import closing
 import os
 import sqlite3
+import time
 
 from flask import (g, session, request, render_template, abort, redirect, flash,
                    url_for, send_from_directory)
 from flask import Flask
+
 from surgery import pliers, keys
 
 
@@ -42,19 +44,10 @@ def teardown_request(exception):
 @app.route('/')
 def show_queries():
     cur = g.db.execute(
-        'select query, depth, link from queries order by id desc')
-    queries = [dict(query=row[0], depth=row[1], link=row[2])
+        'select query, depth, link, timestr from queries order by id desc')
+    queries = [dict(query=row[0], depth=row[1], link=row[2], timestr=row[3])
                for row in cur.fetchall()]
     return render_template('show_queries.html', queries=queries)
-
-
-@app.route('/results')
-def show_results():
-    cur = g.db.execute(
-        'select query, depth, link from queries order by id desc')
-    queries = [dict(query=row[0], depth=row[1], link=row[2])
-               for row in cur.fetchall()]
-    return render_template('show_results.html', queries=queries)
 
 
 @app.route('/teeth/<path:path>')
@@ -67,18 +60,26 @@ def send_result(path):
 def make_query():
     if not session.get('logged_in'):
         abort(401)
-    results_link = pliers.linkify(request.form['query'])
-    g.db.execute('insert into queries (query, depth, link) values (?, ?, ?)',
-                 [request.form['query'],
-                  request.form['depth'],
-                  results_link])
+    timestr = time.strftime("%Y/%m/%d %H:%M:%S")
+    results_link = pliers.linkify(request.form['query'], timestr)
+    stopwords = repr(request.form['stopwords'])
+    g.db.execute(
+        'insert into queries (query, depth, stopwords, minlength, link, timestr) '
+        'values (?, ?, ?, ?, ?, ?)',
+        [request.form['query'],
+         request.form['depth'],
+         request.form['minlength'],
+         stopwords,
+         results_link,
+         timestr,
+         ])
     g.db.commit()
     # start the query running
     pliers.main(request.form['query'],
                 request.form['depth'],
                 results_link,
-                stopwords=request.form['minlength'],
-                minlength=request.form['stopwords'],
+                stopwords=request.form['stopwords'],
+                minlength=request.form['minlength'],
                 )
     flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))

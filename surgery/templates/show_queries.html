@@ -23,7 +23,7 @@
   <h3>Previous extractions</h3>
   <ul class=queries>
   {% for query in queries %}
-    <li><a href="/teeth/{{ query.link }}">{{ query.query }}</a> 
+    <li>{{ query.timestr }} : <a href="/teeth/{{ query.link }}">{{ query.query }}</a>: {{ query.depth }} pages deep 
   {% else %}
     <li><em>No previous appointments</em>
   {% endfor %}
