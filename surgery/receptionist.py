@@ -6,33 +6,17 @@ import sqlite3
 from flask import (g, session, request, render_template, abort, redirect, flash,
                    url_for, send_from_directory)
 from flask import Flask
-from surgery import pliers
+from surgery import pliers, keys
 
-
-# configuration
-DATABASE = '/tmp/news-dentist.db'
-DEBUG = True
-SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
-UPLOAD_FOLDER = 'results'
-ALLOWED_EXTENSIONS = set('txt')
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(THIS_DIR, "static")
 
-# create our application
 app = Flask(__name__, static_url_path='')
-app.config.from_object(__name__)
-
+app.config.from_object(keys)
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 def init_db():
@@ -90,7 +74,7 @@ def make_query():
     g.db.commit()
     # start the query running
     pliers.main(request.form['query'], request.form['depth'])
-    flash('Getting the pliers out. This won\'t hurt a bit...')
+    flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))
 
 

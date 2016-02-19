@@ -8,11 +8,13 @@ Google News.
 """
 
 import argparse
+from concurrent import futures
 import os
 import re
-from concurrent import futures
+
 from bs4 import BeautifulSoup
 import requests
+
 
 MIN_LENGTH = 20  # minimum line length in words
 
@@ -91,6 +93,8 @@ def fetch_results(links):
     """
     batch = []
     to_fetch = [link for link in links if link]
+    if not to_fetch:
+        return batch
     workers = min(MAX_WORKERS, len(to_fetch))
     with futures.ThreadPoolExecutor(workers) as executor:
         res = executor.map(extract, to_fetch)
@@ -102,13 +106,19 @@ def fetch_results(links):
 def extract(link):
     """Fetch and process a link, retaining text which appears to be body text.
     """
-    res = requests.get(link, headers=headers)
+    try:
+        res = requests.get(link, headers=headers, timeout=5)
+    except Exception as e:
+        print("Exception", e)
+        return []
     html = str(res.text)
     soup = BeautifulSoup(html, 'lxml')
     texts = soup.find_all(text=True)
     
-    return filter(visible, texts)
-
+    lines = list(filter(visible, texts))
+    if lines:
+        print('Received %i lines from: %s' % (len(lines), link))
+    return lines
 
 def linkify(query_txt):
     """Make a query into a safe filename.
