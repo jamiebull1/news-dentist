@@ -11,6 +11,7 @@ import argparse
 from concurrent import futures
 import os
 import re
+import time
 
 from bs4 import BeautifulSoup
 import requests
@@ -114,27 +115,30 @@ def extract(link):
     html = str(res.text)
     soup = BeautifulSoup(html, 'lxml')
     texts = soup.find_all(text=True)
-    
+
     lines = list(filter(visible, texts))
     if lines:
         print('Received %i lines from: %s' % (len(lines), link))
     return lines
 
 def linkify(query_txt):
-    """Make a query into a safe filename.
+    """Make a query into a safe filename with timestamp.
     """
     query_txt = query_txt.replace(' ', '_')
     query_txt = re.sub("[^a-zA-Z_]", "", query_txt)
-    filename = "{}.txt".format(query_txt)
+
+    timestr = time.strftime("%Y%m%d_%H%M%S")
+
+    filename = "{}_{}.txt".format(query_txt, timestr)
     return filename
 
 
-def main(query, page_depth):
+def main(query, page_depth=1, file_name=''):
     """Main loop.
     """
     with open(os.path.join(
-            STATIC_DIR, 'teeth/{}'.format(linkify(query))),'w') as tmp_f:
-        tmp_f.write('Still waiting for results')
+            STATIC_DIR, 'teeth/{}'.format(file_name)),'w') as tmp_f:
+        tmp_f.write('Waiting for results.')
     batch = []
     for page_depth in range(int(page_depth)):
         links = get_all_links(query, page_depth)
@@ -142,8 +146,9 @@ def main(query, page_depth):
         article_links = set(get_article_links(links))
         # try the links
         batch.extend(fetch_results(article_links))
-        # save the results
-    with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(linkify(query))), 'w+',
+    # save the results
+    print(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)))
+    with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',
               encoding='utf8') as f:
         f.writelines('\n'.join(l.strip() for l in batch))
 

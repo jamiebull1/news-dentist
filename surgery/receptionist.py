@@ -15,15 +15,16 @@ STATIC_DIR = os.path.join(THIS_DIR, "static")
 app = Flask(__name__, static_url_path='')
 app.config.from_object(keys)
 
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
 
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+
+def connect_db():
+    return sqlite3.connect(app.config['DATABASE'])
 
 
 @app.before_request
@@ -73,7 +74,7 @@ def make_query():
                   results_link])
     g.db.commit()
     # start the query running
-    pliers.main(request.form['query'], request.form['depth'])
+    pliers.main(request.form['query'], request.form['depth'], results_link)
     flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))
 
