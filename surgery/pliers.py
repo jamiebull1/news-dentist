@@ -52,6 +52,8 @@ def visible(element, minlength):
         return False
     elif '//' in str(element):  # comment tags
         return False
+    elif '{*' in str(element):  # comment tags
+        return False
     elif re.match('\[if .*endif\]', str(element)):  # IE strings
         return False
     elif not element.strip():  # empty lines

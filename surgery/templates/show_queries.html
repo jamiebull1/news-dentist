@@ -15,17 +15,19 @@
         <dt>Stop words (comma-separated):
         <dd><input type=text size=30 name=stopwords>
         <br>
-        <h3>Operation</h3>
+        <br>
         <dd><input type=submit value="Yank that news tooth!">
       </dl>
     </form>
-  {% endif %}
   <h3>Previous extractions</h3>
   <ul class=queries>
   {% for query in queries %}
-    <li>{{ query.timestr }} : <a href="/teeth/{{ query.link }}">{{ query.query }}</a>: {{ query.depth }} pages deep 
+    <li><a href="/teeth/{{ query.link }}">{{ query.query }}</a> 
+    <a href="/stats/{{ query.link }}">(statistics)</a> 
+    {{ query.timestr }}, {{ query.depth }} pages deep 
   {% else %}
     <li><em>No previous appointments</em>
   {% endfor %}
   </ul>
+  {% endif %}
 {% endblock %}

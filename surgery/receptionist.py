@@ -7,8 +7,10 @@ import time
 from flask import (g, session, request, render_template, abort, redirect, flash,
                    url_for, send_from_directory)
 from flask import Flask
+import wordcloud
 
 from surgery import pliers, keys
+from surgery import toothcomb, stickers
 
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -48,6 +50,23 @@ def show_queries():
     queries = [dict(query=row[0], depth=row[1], link=row[2], timestr=row[3])
                for row in cur.fetchall()]
     return render_template('show_queries.html', queries=queries)
+
+
+@app.route('/stats/<path:path>')
+def send_stats(path):
+    text = toothcomb.Text(path)
+    stats = {'top10': text.most_common(10),
+             'top50': text.most_common(50),
+             'top100': text.most_common(100)
+             }
+    stats['query'] = ' '.join(path.split('_')[:-1])
+    # render a wordcloud
+    png_name = path[:-4] + '.png'
+    stats['wordcloud'] = png_name
+
+    stickers.generate(path, png_name)
+
+    return render_template('show_stats.html', stats=stats)
 
 
 @app.route('/teeth/<path:path>')

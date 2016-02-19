@@ -18,5 +18,7 @@ setup(name='news-dentist',
           "lxml>=3.5",
           "requests>=2.9",
           "flask>=0.10.1",
+          "matplotlib>=1.5.1",
+          "Pillow>=3.1.1",
       ],
       )
