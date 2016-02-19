@@ -86,7 +86,7 @@ def get_article_links(links):
     return list(m[0] for m in regex_matches if m)
 
 
-def fetch_results(links):
+def fetch_results(links, stopwords, minlength):
     """
     Fetch the text from the article links and add the article to a list of
     links already visited.
@@ -133,7 +133,7 @@ def linkify(query_txt):
     return filename
 
 
-def main(query, page_depth=1, file_name=''):
+def main(query, page_depth=1, file_name='', stopwords=None, minlength=20):
     """Main loop.
     """
     with open(os.path.join(
@@ -145,7 +145,7 @@ def main(query, page_depth=1, file_name=''):
         # get unique links to try
         article_links = set(get_article_links(links))
         # try the links
-        batch.extend(fetch_results(article_links))
+        batch.extend(fetch_results(article_links, stopwords, minlength))
     # save the results
     print(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)))
     with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',

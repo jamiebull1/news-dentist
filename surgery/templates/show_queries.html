@@ -3,10 +3,19 @@
   {% if session.logged_in %}
     <form action="{{ url_for('make_query') }}" method=post class=make-query>
       <dl>
+        <h3>Basic settings</h3>
         <dt>Query:
         <dd><input type=text size=30 name=query>
-        <dt>How deep?:
-        <dd><input type=text size=3 name=depth> pages
+        <dt>Fetch:
+        <dd><input type=text size=3 name=depth> pages of news results
+        <br>
+        <h4>Hygienist settings</h4>
+        <dt>Minimum line length (number of words):
+        <dd><input type=int size=3 name=minlength>
+        <dt>Stop words (comma-separated):
+        <dd><input type=text size=30 name=stopwords>
+        <br>
+        <h3>Operation</h3>
         <dd><input type=submit value="Yank that news tooth!">
       </dl>
     </form>

@@ -74,7 +74,12 @@ def make_query():
                   results_link])
     g.db.commit()
     # start the query running
-    pliers.main(request.form['query'], request.form['depth'], results_link)
+    pliers.main(request.form['query'],
+                request.form['depth'],
+                results_link,
+                stopwords=request.form['minlength'],
+                minlength=request.form['stopwords'],
+                )
     flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))
 
