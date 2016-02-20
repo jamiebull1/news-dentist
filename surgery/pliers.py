@@ -8,11 +8,10 @@ Google News.
 """
 
 from concurrent import futures
+from functools import partial
 import argparse
 import os
 import re
-import time
-from functools import partial
 
 from bs4 import BeautifulSoup
 import requests
@@ -88,7 +87,7 @@ def get_article_links(links):
     return list(m[0] for m in regex_matches if m)
 
 
-def fetch_results(links, stopwords, minlength):
+def fetch_results(links, minlength):
     """
     Fetch the text from the article links and add the article to a list of
     links already visited.
@@ -101,14 +100,13 @@ def fetch_results(links, stopwords, minlength):
     workers = min(MAX_WORKERS, len(to_fetch))
     with futures.ThreadPoolExecutor(workers) as executor:
         res = executor.map(partial(extract,
-                                   stopwords=stopwords,
                                    minlength=minlength), to_fetch)
     for r in res:
         batch.extend(list(r))
     return batch
 
 
-def extract(link, stopwords=None, minlength=None):
+def extract(link, minlength=None):
     """Fetch and process a link, retaining text which appears to be body text.
     """
     try:
@@ -122,8 +120,6 @@ def extract(link, stopwords=None, minlength=None):
     lines = list(filter(partial(visible, minlength=minlength), texts))
     if lines:
         print('Received %i lines from: %s' % (len(lines), link))
-    if any(word in html for word in stopwords):
-        return []
     return lines
 
 
@@ -137,7 +133,7 @@ def linkify(query_txt, timestr):
     return filename
 
 
-def main(query, page_depth=1, file_name='', stopwords=None, minlength=''):
+def main(query, page_depth=1, file_name='', minlength=''):
     """Main loop.
     """
     if minlength == '':
@@ -151,7 +147,7 @@ def main(query, page_depth=1, file_name='', stopwords=None, minlength=''):
         # get unique links to try
         article_links = set(get_article_links(links))
         # try the links
-        batch.extend(fetch_results(article_links, stopwords, minlength))
+        batch.extend(fetch_results(article_links, minlength))
     # save the results
     print(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)))
     with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',

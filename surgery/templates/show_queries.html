@@ -9,25 +9,23 @@
         <dt>Fetch:
         <dd><input type=text size=3 name=depth> pages of news results
         <br>
-        <h4>Hygienist settings</h4>
+        <dt><h4>Advanced settings</h4>
         <dt>Minimum line length (number of words):
         <dd><input type=int size=3 name=minlength>
-        <dt>Stop words (comma-separated):
-        <dd><input type=text size=30 name=stopwords>
         <br>
         <br>
         <dd><input type=submit value="Yank that news tooth!">
       </dl>
     </form>
-  <h3>Previous extractions</h3>
-  <ul class=queries>
-  {% for query in queries %}
-    <li><a href="/teeth/{{ query.link }}">{{ query.query }}</a> 
-    <a href="/stats/{{ query.link }}">(statistics)</a> 
-    {{ query.timestr }}, {{ query.depth }} pages deep 
-  {% else %}
-    <li><em>No previous appointments</em>
-  {% endfor %}
-  </ul>
+    <h3>Dental history</h3>
+    <ul class=queries>
+    {% for query in queries %}
+      <li><a href="/teeth/{{ query.link }}">{{ query.query }}</a> 
+      <a href="/stats/{{ query.link }}">(statistics)</a> 
+      {{ query.timestr }}, {{ query.depth }} pages deep 
+    {% else %}
+      <li><em>No previous appointments</em>
+    {% endfor %}
+    </ul>
   {% endif %}
 {% endblock %}

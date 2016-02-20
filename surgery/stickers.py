@@ -19,9 +19,11 @@ def blues(*args, **kwargs):
 
 def generate(path, img_path):
     img_path = os.path.join(STATIC_DIR, 'img', img_path)
-    text = open(os.path.join(STATIC_DIR, 'teeth', path)).read()
 #    if os.path.isfile(img_path):
 #        return
+    text = open(os.path.join(STATIC_DIR, 'teeth', path)).read()
+    if not text:
+        return
     # take relative word frequencies into account, lower max_font_size
     cloud = WordCloud(
         max_font_size=40,

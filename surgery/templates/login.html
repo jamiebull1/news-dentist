@@ -11,4 +11,30 @@
       <dd><input type=submit value=Login>
     </dl>
   </form>
+  {% if False %}
+	  <h2>Recover password</h2>
+	  <form action="{{ url_for('recover') }}" method=post>
+	    <dl>
+	      <dt>Username:
+	      <dd><input type=text name=username>
+	      <dt>Email:
+	      <dd><input type=text name=email>
+	      <dd><input type=submit value=Recover>
+	    </dl>
+	  </form>
+  {% endif %}
+  <h2>Signup</h2>
+  <form action="{{ url_for('signup') }}" method=post>
+    <dl>
+      <dt>Username:
+      <dd><input type=text name=username>
+      <dt>Email:
+      <dd><input type=text name=email>
+      <dt>Password:
+      <dd><input type=password name=password>
+      <dt>Repeat password:
+      <dd><input type=password name=password2>
+      <dd><input type=submit value=Signup>
+    </dl>
+  </form>
 {% endblock %}
