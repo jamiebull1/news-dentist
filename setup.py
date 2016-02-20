@@ -20,5 +20,6 @@ setup(name='news-dentist',
           "flask>=0.10.1",
           "matplotlib>=1.5.1",
           "Pillow>=3.1.1",
+          "wordcloud>=1.2.1",
       ],
       )
