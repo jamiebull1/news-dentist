@@ -33,6 +33,7 @@ params = {
     'hl': 'en',
     'gl': 'uk',
     'tbm': 'nws',
+    'pws': 0,
 }
 
 
@@ -70,7 +71,7 @@ def get_all_links(query, page_depth):
     """Get article links for the query at the given page depth.
     """
     params['q'] = query
-    params['start'] = page_depth * 10
+    params['num'] = page_depth * 10
     res = requests.get(SEARCH_URL, params=params, headers=headers)
     html = res.text
     soup = BeautifulSoup(html, 'html.parser')
@@ -149,7 +150,6 @@ def main(query, page_depth=1, file_name='', minlength=''):
         # try the links
         batch.extend(fetch_results(article_links, minlength))
     # save the results
-    print(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)))
     with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',
               encoding='utf8') as f:
         f.writelines('\n'.join(l.strip() for l in batch))
