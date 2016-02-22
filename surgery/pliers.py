@@ -9,12 +9,12 @@ Google News.
 
 from concurrent import futures
 from functools import partial
-import argparse
 import os
 import re
 
 from bs4 import BeautifulSoup
-import requests
+
+from surgery.config import current_session
 
 
 SEARCH_URL = 'https://www.google.com/search'
@@ -72,7 +72,7 @@ def get_all_links(query, page_depth):
     """
     params['q'] = query
     params['num'] = page_depth * 10
-    res = requests.get(SEARCH_URL, params=params, headers=headers)
+    res = current_session.get(SEARCH_URL, params=params, headers=headers)
     html = res.text
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -111,7 +111,7 @@ def extract(link, minlength=None):
     """Fetch and process a link, retaining text which appears to be body text.
     """
     try:
-        res = requests.get(link, headers=headers, timeout=5)
+        res = current_session.get(link, headers=headers, timeout=5)
     except Exception as e:
         print("Exception", e)
         return []
@@ -143,26 +143,12 @@ def main(query, page_depth=1, file_name='', minlength=''):
             STATIC_DIR, 'teeth/{}'.format(file_name)), 'w') as tmp_f:
         tmp_f.write('Waiting for results.')
     batch = []
-    for page_depth in range(int(page_depth)):
-        links = get_all_links(query, page_depth)
-        # get unique links to try
-        article_links = set(get_article_links(links))
-        # try the links
-        batch.extend(fetch_results(article_links, minlength))
+    links = get_all_links(query, int(page_depth))
+    # get unique links to try
+    article_links = set(get_article_links(links))
+    # try the links
+    batch.extend(fetch_results(article_links, minlength))
     # save the results
     with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',
               encoding='utf8') as f:
         f.writelines('\n'.join(l.strip() for l in batch))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Customisable extraction of text from the news.')
-    parser.add_argument('-q', metavar='query', type=str,
-                        help='search term')
-    parser.add_argument('-d', metavar='page depth', type=int,
-                        help='page depth (10 results per page)')
-
-    args = parser.parse_args()
-
-    main(args.q, args.d)
