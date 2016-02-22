@@ -84,6 +84,7 @@ def send_result(path):
 def make_query():
     if not session.get('logged_in'):
         abort(401)
+        
     timestr = time.strftime("%Y/%m/%d %H:%M:%S")
     results_link = pliers.linkify(request.form['query'], timestr)
     g.db.execute(
@@ -100,14 +101,18 @@ def make_query():
          ])
     g.db.commit()
     # start the query running
-    pliers.main(request.form['query'],
+    res = pliers.main(request.form['query'],
                 request.form['depth'],
                 results_link,
                 minlength=request.form['minlength'],
+                cookie=request.form['cookie']
                 )
+    if res:
+        print(res['captcha'])
+        return redirect(res['captcha'])
+        
     flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

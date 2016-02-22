@@ -13,11 +13,13 @@ import os
 import re
 
 from bs4 import BeautifulSoup
+import requests
 
-from surgery.config import current_session
+from surgery.config import googler
 
 
 SEARCH_URL = 'https://www.google.com/search'
+
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(THIS_DIR, "static")
 
@@ -30,10 +32,11 @@ headers = {
 }
 
 params = {
-    'hl': 'en',
-    'gl': 'uk',
-    'tbm': 'nws',
-    'pws': 0,
+    'hl': 'en',    # search in english
+    'gl': 'uk',    # search uk
+    'tbm': 'nws',  # search news sites
+    'pws': 0,      # don't personalise searches
+    'gbv': 1,      # disable javascript
 }
 
 
@@ -70,13 +73,26 @@ def visible(element, minlength):
 def get_all_links(query, page_depth):
     """Get article links for the query at the given page depth.
     """
+#    set_abuse_prevention_cookie(GOOGLE_ABUSE_PREVENTION)
     params['q'] = query
     params['num'] = page_depth * 10
-    res = current_session.get(SEARCH_URL, params=params, headers=headers)
-    html = res.text
-    soup = BeautifulSoup(html, 'html.parser')
+    res = googler.session.get(SEARCH_URL, params=params, headers=headers)
+    html = res.content
+    print("STATUS CODE")
+    print(res.status_code)
+    print("REQUEST HEADERS")
+    print(res.request.headers)
+    print("RESPONSE HEADERS")
+    print(res.headers)
+    print("COOKIES")
+    print(googler.session.cookies)
 
-    return soup.find_all('a')
+    soup = BeautifulSoup(html, 'html.parser')
+    if res.status_code == 503:
+        return {'captcha': res.url}
+    else:
+        return soup.find_all('a')
+
 
 
 def get_article_links(links):
@@ -111,7 +127,7 @@ def extract(link, minlength=None):
     """Fetch and process a link, retaining text which appears to be body text.
     """
     try:
-        res = current_session.get(link, headers=headers, timeout=5)
+        res = requests.get(link, headers=headers, timeout=5)
     except Exception as e:
         print("Exception", e)
         return []
@@ -128,26 +144,33 @@ def linkify(query_txt, timestr):
     """Make a query into a safe filename with timestamp.
     """
     query_txt = query_txt.replace(' ', '_')
-    query_txt = re.sub("[^a-zA-Z_]", "", query_txt)
+    query_txt = re.sub("[^a-zA-Z0-9_]", "", query_txt)
     timestr = re.sub(r"[/:-]", "", timestr)
     filename = "{}_{}.txt".format(query_txt, timestr)
     return filename
 
 
-def main(query, page_depth=1, file_name='', minlength=''):
-    """Main loop.
-    """
+def set_cookie(cookie):
+    googler.session.cookies['GOOGLE_ABUSE_EXEMPTION'] = cookie.strip()
+
+
+def main(query, page_depth=1, file_name='', minlength='', cookie=''):
+    if page_depth == '':
+        page_depth = 1
     if minlength == '':
         minlength = MIN_LENGTH
+    if cookie:
+        set_cookie(cookie)
     with open(os.path.join(
             STATIC_DIR, 'teeth/{}'.format(file_name)), 'w') as tmp_f:
         tmp_f.write('Waiting for results.')
-    batch = []
     links = get_all_links(query, int(page_depth))
+    if 'captcha' in links:
+        return links
     # get unique links to try
     article_links = set(get_article_links(links))
     # try the links
-    batch.extend(fetch_results(article_links, minlength))
+    batch = fetch_results(article_links, minlength)
     # save the results
     with open(os.path.join(STATIC_DIR, 'teeth/{}'.format(file_name)), 'w',
               encoding='utf8') as f:
