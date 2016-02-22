@@ -50,7 +50,6 @@ class ReceptionistTestCase(unittest.TestCase):
         ), follow_redirects=True)
         assert b'No queries here so far' not in rv.data
         assert b'&lt;Hello World&gt;' in rv.data
-        print(rv.data)
         assert b'/results/Hello_World.txt' in rv.data
         assert b'987' in rv.data
 
