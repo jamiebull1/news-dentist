@@ -39,7 +39,7 @@ class Text():
 
     def __init__(self, path):
         filepath = os.path.join(STATIC_DIR, 'teeth', path)
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf8') as f:
             text = f.readlines()
         c = Counter()
         for line in iter(text):
