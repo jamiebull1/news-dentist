@@ -2,10 +2,12 @@
 {% block body %}
   {% if session.logged_in %}
   <h3>Getting round Google</h3>
-  <p><a href="javascript: (function() {alert(listCookies()); function listCookies() { var theCookies = document.cookie.split(';'); var aString = ''; for (var i = 1 ; i <= theCookies.length; i++) { if (theCookies[i-1].indexOf('GOOGLE_ABUSE_EXEMPTION') > -1) { aString += theCookies[i-1].replace('GOOGLE_ABUSE_EXEMPTION=', '');} } return aString;}})()
-  ">Get Cookie</a> (drag link to the bookmark bar)</p>
-  <p>After being redirected after a CAPTCHA page, click the "Get Cookie" bookmark (while still on the Google search results page), then copy the cookie value with Ctrl-C or Cmd-C from the message box that pops up (works on Chrome, not on Firefox, untested elsewhere).</p>
-  <p>Then return here and paste the cookie value into the cookie field of the advanced settings below.</p>
+	  <li>drag this <a href="javascript: (function() {alert(listCookies()); function listCookies() { var theCookies = document.cookie.split(';'); var aString = ''; for (var i = 1 ; i <= theCookies.length; i++) { if (theCookies[i-1].indexOf('GOOGLE_ABUSE_EXEMPTION') > -1) { aString += theCookies[i-1].replace('GOOGLE_ABUSE_EXEMPTION=', '');} } return aString;}})()
+	  ">Get Cookie</a> link to your bookmark bar before you start searching
+	  <li>if you are shown a CAPTCHA, fill it out and submit it
+	  <li>when taken to the results page, click the "Get Cookie" bookmark
+	  <li>copy the cookie value with Ctrl-C or Cmd-C from the message box that pops up (works on Chrome, not on Firefox, untested elsewhere).
+	  <li>return here and paste the cookie value into the cookie field of the advanced settings below.
     <form action="{{ url_for('make_query') }}" method=post class=make-query>
       <dl>
         <h3>Basic settings</h3>
