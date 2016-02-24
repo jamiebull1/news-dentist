@@ -52,7 +52,8 @@ def show_queries():
         "order by id desc".format(session['user']))
     queries = [dict(query=row[1], depth=row[2], link=row[3], timestr=row[4])
                for row in cur.fetchall()]
-    return render_template('show_queries.html', queries=queries)
+    env = os.environ.get("ENVIRONMENT", "LOCAL")
+    return render_template('show_queries.html', queries=queries, env=env)
 
 
 @app.route('/stats/<path:path>')

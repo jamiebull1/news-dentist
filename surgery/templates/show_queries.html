@@ -2,6 +2,15 @@
 {% block body %}
   {% if session.logged_in %}
   <h3>Getting round Google</h3>
+  {% if env == 'PRODUCTION' %}
+	  <p>If you are shown a CAPTCHA then someone has been using NewsDentist to make searches that look like a bot.
+	  <p>Until we come up with a better solution, either:
+	  <ol>
+	    <li>Come back later and try again.
+	    <li>Or install NewsDentist on your own machine where we have a way around this (<a href="https://github.com/jamiebull1/news-dentist">instructions here</a>).
+	  </ol>
+	  <p>You can help to avoid getting us blocked by limiting your use of advanced operators like "daterange" and Google <a href="https://en.wikipedia.org/wiki/Google_hacking">"dorks"</a> as these seem to trigger CAPTCHAs more frequently than other searches.
+  {% elif env == 'LOCAL' %}
   <ol>
 	  <li>Drag this <a href="javascript: (function() {alert(listCookies()); function listCookies() { var theCookies = document.cookie.split(';'); var aString = ''; for (var i = 1 ; i <= theCookies.length; i++) { if (theCookies[i-1].indexOf('GOOGLE_ABUSE_EXEMPTION') > -1) { aString += theCookies[i-1].replace('GOOGLE_ABUSE_EXEMPTION=', '');} } return aString;}})()
 	  ">Get Cookie</a> link to your bookmark bar before you start searching.
@@ -11,6 +20,7 @@
 	  <li>Return here and paste the cookie value into the cookie field of the advanced settings below.
 	  <li>You will now be able to search again (though if you keep using advanced operators, or making a lot of searches you may have to repeat the process).
   </ol>
+  {% endif %}
     <form action="{{ url_for('make_query') }}" method=post class=make-query>
       <dl>
         <h3>Basic settings</h3>
