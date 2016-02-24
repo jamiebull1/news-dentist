@@ -40,6 +40,7 @@ params = {
     'tbm': 'nws',  # search news sites
     'pws': 0,      # don't personalise searches
     'gbv': 1,      # disable javascript
+    'nfrpr': 1,    # don't autocorrect parameters 
 }
 
 
