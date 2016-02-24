@@ -2,17 +2,20 @@
 {% block body %}
   {% if session.logged_in %}
   <h3>Getting round Google</h3>
-	  <li>drag this <a href="javascript: (function() {alert(listCookies()); function listCookies() { var theCookies = document.cookie.split(';'); var aString = ''; for (var i = 1 ; i <= theCookies.length; i++) { if (theCookies[i-1].indexOf('GOOGLE_ABUSE_EXEMPTION') > -1) { aString += theCookies[i-1].replace('GOOGLE_ABUSE_EXEMPTION=', '');} } return aString;}})()
-	  ">Get Cookie</a> link to your bookmark bar before you start searching
-	  <li>if you are shown a CAPTCHA, fill it out and submit it
-	  <li>when taken to the results page, click the "Get Cookie" bookmark
-	  <li>copy the cookie value with Ctrl-C or Cmd-C from the message box that pops up (works on Chrome and Firefox, untested elsewhere).
-	  <li>return here and paste the cookie value into the cookie field of the advanced settings below.
+  <ol>
+	  <li>Drag this <a href="javascript: (function() {alert(listCookies()); function listCookies() { var theCookies = document.cookie.split(';'); var aString = ''; for (var i = 1 ; i <= theCookies.length; i++) { if (theCookies[i-1].indexOf('GOOGLE_ABUSE_EXEMPTION') > -1) { aString += theCookies[i-1].replace('GOOGLE_ABUSE_EXEMPTION=', '');} } return aString;}})()
+	  ">Get Cookie</a> link to your bookmark bar before you start searching.
+	  <li>If you are shown a CAPTCHA, fill it out and submit it. This happens most often if you use advanced operators like "daterange".
+	  <li>When taken to the search results page, click the "Get Cookie" bookmark
+	  <li>Copy the cookie value with Ctrl-C or Cmd-C from the message box that pops up.
+	  <li>Return here and paste the cookie value into the cookie field of the advanced settings below.
+	  <li>You will now be able to search again (though if you keep using advanced operators, or making a lot of searches you may have to repeat the process).
+  </ol>
     <form action="{{ url_for('make_query') }}" method=post class=make-query>
       <dl>
         <h3>Basic settings</h3>
         <dt>Query:
-        <dd><input type=text size=30 name=query>
+        <dd><input type=text size=50 name=query maxlength="2048" style='border: 1px solid rgb(126, 157, 185); padding: 2px; background: rgb(255, 255, 255) url("kinda.png") no-repeat scroll left center;'>
         <dt>Fetch:
         <dd><input type=text size=3 name=depth> pages of news results
         <br>
@@ -20,7 +23,7 @@
         <dt>Minimum line length (number of words):
         <dd><input type=int size=3 name=minlength>
         <dt>Cookie:
-        <dd><input type=text size=30 name=cookie>
+        <dd><input type=text size=50 name=cookie>
         <br>
         <br>
         <dd><input type=submit value="Yank that news tooth!">
