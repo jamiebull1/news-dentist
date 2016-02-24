@@ -48,7 +48,8 @@ def teardown_request(exception):
 def show_queries():
     cur = g.db.execute(
         "select username, query, depth, link, timestr from queries "
-        "order by id desc")
+        "where username='{}'"
+        "order by id desc".format(session['user']))
     queries = [dict(query=row[1], depth=row[2], link=row[3], timestr=row[4])
                for row in cur.fetchall()]
     return render_template('show_queries.html', queries=queries)
