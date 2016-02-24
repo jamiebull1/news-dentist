@@ -25,11 +25,11 @@ STOPWORDS = ("a,able,about,across,after,all,almost,also,am,among,an,and,any,"
              "while,who,whom,why,will,with,would,yet,you,your,--,—,-,"
              "–,".split(','))
 
+
 def clean(w):
     """Strip whitespace and punctuation.
     """
     w = w.strip(string.punctuation + string.whitespace)
-
     return w
 
 
@@ -42,7 +42,7 @@ class Text():
         c = Counter()
         for line in iter(text):
             c.update(clean(w) for w in line.split()
-                     if clean(w).lower() not in STOPWORDS)
+                     if clean(w).lower() not in STOPWORDS if clean(w))
         self.c = c
 
     def most_common(self, n=10):
