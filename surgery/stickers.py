@@ -7,6 +7,7 @@ import random
 from wordcloud import WordCloud
 
 import matplotlib.pyplot as plt
+from surgery.toothcomb import STOPWORDS
 
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -29,6 +30,7 @@ def generate(path, img_path):
     # take relative word frequencies into account, lower max_font_size
     cloud = WordCloud(
         max_font_size=40,
+        stopwords=STOPWORDS,
         relative_scaling=0.5,
         scale=3,
         background_color='white',

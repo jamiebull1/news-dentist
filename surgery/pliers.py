@@ -3,7 +3,9 @@
 pliers.py
 ~~~~~~~~~
 Tool used by news-dentist to extract the text of articles from the mouth of
-Google News.
+Google News. We use a regular user-agent string for searches on Google News,
+followed by downloading text for analysis using the Google News user-agent
+string.
 
 """
 
@@ -26,14 +28,15 @@ STATIC_DIR = os.path.join(THIS_DIR, "static")
 MAX_WORKERS = 20
 MIN_LENGTH = 20
 
-headers = {
-    'User-Agent':
-    'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3 Gecko/2008092417 Firefox/3.0.3'
-}
+headers = {'search': {
+                      'User-Agent':
+                      'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3 Gecko/2008092417 Firefox/3.0.3'
+                      },
+           'download': {'User-Agent': 'Googlebot-News'}}
 
 params = {
-    'hl': 'en',    # search in english
-    'gl': 'uk',    # search uk
+    'hl': 'en-GB', # search in English
+    'gl': 'uk',    # search UK
     'tbm': 'nws',  # search news sites
     'pws': 0,      # don't personalise searches
     'gbv': 1,      # disable javascript
@@ -76,7 +79,8 @@ def get_all_links(query, page_depth):
 #    set_abuse_prevention_cookie(GOOGLE_ABUSE_PREVENTION)
     params['q'] = query
     params['num'] = page_depth * 10
-    res = googler.session.get(SEARCH_URL, params=params, headers=headers)
+    res = googler.session.get(
+        SEARCH_URL, params=params, headers=headers.get('search'))
     html = res.content
     print("STATUS CODE")
     print(res.status_code)
@@ -127,7 +131,7 @@ def extract(link, minlength=None):
     """Fetch and process a link, retaining text which appears to be body text.
     """
     try:
-        res = requests.get(link, headers=headers, timeout=5)
+        res = requests.get(link, headers=headers.get('download'), timeout=5)
     except Exception as e:
         print("Exception", e)
         return []
@@ -151,20 +155,29 @@ def linkify(query_txt, timestr):
 
 
 def set_cookie(cookie):
+    """
+    Set a GOOGLE_ABUSE_EXEMPTION cookie retrieved after manually completing a
+    CAPTCHA challenge.
+    
+    """
     googler.session.cookies['GOOGLE_ABUSE_EXEMPTION'] = cookie.strip()
 
 
 def main(query, page_depth=1, file_name='', minlength='', cookie=''):
     if page_depth == '':
         page_depth = 1
+        
     if minlength == '':
         minlength = MIN_LENGTH
+        
     if cookie:
         set_cookie(cookie)
+    # write a dummy file
     with open(os.path.join(
             STATIC_DIR, 'teeth/{}'.format(file_name)), 'w') as tmp_f:
         tmp_f.write('Waiting for results.')
-    links = get_all_links(query, int(page_depth))
+    # fetch links from Google
+    links = get_all_links(query, int(page_depth))    
     if 'captcha' in links:
         return links
     # get unique links to try

@@ -8,6 +8,8 @@ words.
 """
 from collections import Counter
 import os
+import string
+
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(THIS_DIR, "static")
@@ -20,17 +22,13 @@ STOPWORDS = ("a,able,about,across,after,all,almost,also,am,among,an,and,any,"
              "often,on,only,or,other,our,own,rather,said,say,says,she,should,"
              "since,so,some,than,that,the,their,them,then,there,these,they,"
              "this,tis,to,too,twas,us,wants,was,we,were,what,when,where,which,"
-             "while,who,whom,why,will,with,would,yet,you,your,--,—,,-,"
+             "while,who,whom,why,will,with,would,yet,you,your,--,—,-,"
              "–,".split(','))
 
-
 def clean(w):
-    """Remove some punctuation.
+    """Strip whitespace and punctuation.
     """
-    w = w.replace('.', '')
-    w = w.replace(',', '')
-    w = w.replace('"', '')
-    w = w.replace('“', '')
+    w = w.strip(string.punctuation + string.whitespace)
 
     return w
 

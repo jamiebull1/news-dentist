@@ -114,6 +114,7 @@ def make_query():
     flash('See, that wasn\'t so bad was it?')
     return redirect(url_for('show_queries'))
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
