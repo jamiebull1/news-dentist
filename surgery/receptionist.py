@@ -49,7 +49,7 @@ def show_queries():
     cur = g.db.execute(
         "select username, query, depth, link, timestr from queries "
         "where username='{}'"
-        "order by id desc".format(session['user']))
+        "order by id desc".format(session.get('user','')))
     queries = [dict(query=row[1], depth=row[2], link=row[3], timestr=row[4])
                for row in cur.fetchall()]
     env = os.environ.get("ENVIRONMENT", "LOCAL")
