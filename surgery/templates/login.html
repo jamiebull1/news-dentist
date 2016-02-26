@@ -3,6 +3,7 @@
   <h2>Login</h2>
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
   <form action="{{ url_for('login') }}" method=post>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">    
     <dl>
       <dt>Username:
       <dd><input type=text name=username>
@@ -14,6 +15,7 @@
   {% if False %}
 	  <h2>Recover password</h2>
 	  <form action="{{ url_for('recover') }}" method=post>
+        <input name=_csrf_token type=hidden value="{{ csrf_token() }}">    
 	    <dl>
 	      <dt>Username:
 	      <dd><input type=text name=username>
@@ -25,6 +27,7 @@
   {% endif %}
   <h2>Signup</h2>
   <form action="{{ url_for('signup') }}" method=post>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">    
     <dl>
       <dt>Username:
       <dd><input type=text name=username>

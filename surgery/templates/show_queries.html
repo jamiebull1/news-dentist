@@ -22,6 +22,7 @@
   </ol>
   {% endif %}
     <form action="{{ url_for('make_query') }}" method=post class=make-query>
+      <input name=_csrf_token type=hidden value="{{ csrf_token() }}">    
       <dl>
         <h3>Basic settings</h3>
         <dt>Query:
