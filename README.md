@@ -14,7 +14,8 @@ A dentistry-themed webtool for extracting the text of articles on Google News an
 3. From a terminal window, `cd` into the `news-dentist` folder
 4. `conda create -n news-dentist python=3.5`
 5. `activate news-dentist`
-6. `python setup.py install`
-7. `python app.py`
-8. Visit [localhost](http://localhost:5000) (in Chrome) to log into NewsDentist
+6. `brew install libjpeg`
+7. `python setup.py install`
+8. `python app.py`
+9. Visit [localhost](http://localhost:5000) (in Chrome) to log into NewsDentist
 
