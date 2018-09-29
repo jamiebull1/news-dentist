@@ -1,7 +1,7 @@
 beautifulsoup4==4.4.1
 lxml==3.5.0
 requests==2.9.1
-wheel==0.29.0
+wheel==0.32.0
 flask==0.10.1
 matplotlib==1.5.1
 Pillow==3.1.1
