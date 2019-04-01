@@ -1,5 +1,5 @@
 wheel==0.33.1
-beautifulsoup4==4.6.3
+beautifulsoup4==4.7.1
 lxml==4.2.5
 requests==2.20.1
 wheel==0.33.1
