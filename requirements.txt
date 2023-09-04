@@ -1,8 +1,8 @@
-wheel==0.32.3
+wheel==0.41.2
 beautifulsoup4==4.6.3
 lxml==4.2.5
 requests==2.20.1
-wheel==0.32.3
+wheel==0.41.2
 matplotlib==3.0.2
 flask==1.0.2
 Pillow==5.3.0
