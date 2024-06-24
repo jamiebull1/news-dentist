@@ -6,4 +6,4 @@ wheel==0.43.0
 matplotlib==3.9.0
 flask==3.0.3
 Pillow==10.3.0
-wordcloud==1.5.0
+wordcloud==1.9.3
