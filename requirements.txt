@@ -1,6 +1,6 @@
 wheel==0.44.0
 beautifulsoup4==4.12.3
-lxml==4.2.5
+lxml==5.2.2
 requests==2.20.1
 wheel==0.44.0
 matplotlib==3.0.2
