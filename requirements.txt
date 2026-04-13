@@ -3,7 +3,7 @@ beautifulsoup4==4.14.3
 lxml==6.0.4
 requests==2.33.1
 wheel==0.46.3
-matplotlib==3.0.2
+matplotlib==3.10.8
 flask==1.0.2
 Pillow==5.3.0
 wordcloud==1.5.0
